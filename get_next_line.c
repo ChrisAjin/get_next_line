@@ -10,74 +10,86 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+include "get_next_line.h"
 
-char	*read_files(int rd, char *rest, int fd, char *buffer)
+static void		ft_free_null(char **ptr)
 {
-	while (rd != 0 && !ft_strchr(rest, '\n'))
+	if (!ptr || !*ptr)
+		return ;
+	free(*ptr);
+	*ptr = NULL;
+}
+
+static void		ft_cpy_exc_buff(char **buff, long long j)
+{
+	long long	i;
+	char		tmp[ARG_MAX];
+
+	i = 0;
+	if (buff[0][j] == '\0')
+		ft_free_null(&*buff);
+	else
 	{
-		rd = read(fd, buffer, BUFFER_SIZE);
-		if (rd < 0)
+		while (buff[0][j] != '\0')
+			tmp[i++] = buff[0][j++];
+		tmp[i] = '\0';
+		ft_free_null(&*buff);
+		*buff = ft_strdup(tmp);
+	}
+}
+
+static int		ft_buff2line(char **line, char **buff)
+{
+	long long	i;
+	long long	j;
+	char		tmp[ARG_MAX];
+
+	i = 0;
+	j = 0;
+	while (line[0][i] != '\0')
+	{
+		tmp[i] = line[0][i];
+		i++;
+	}
+	ft_free_null(&*line);
+	while (buff[0][j] != '\0' && buff[0][j] != '\n')
+		tmp[i++] = buff[0][j++];
+	tmp[i] = '\0';
+	*line = ft_strdup(tmp);
+	if (buff[0][j] == '\n')
+	{
+		ft_cpy_exc_buff(&*buff, j + 1);
+		return (FOUND_ENDLINE);
+	}
+	ft_free_null(&*buff);
+	return (NO_ENDLINE);
+}
+
+int				get_next_line(int fd, char **line)
+{
+	static char	*buff[OPEN_MAX];
+	char		tmp[ARG_MAX];
+	int			ret[2];
+
+	if (fd >= 0 && line && BUFFER_SIZE > 0 && (*line = ft_strdup("")))
+	{
+		ret[0] = NO_ENDLINE;
+		while (ret[0] == NO_ENDLINE)
 		{
-			free(buffer);
-			return (NULL);
+			if (buff[fd] == NULL && (ret[1] = read(fd, tmp, BUFFER_SIZE)) >= 0
+				&& (tmp[ret[1]] = '\0') == 0)
+				buff[fd] = ft_strdup(tmp);
+			if (buff[fd] != NULL)
+				ret[1] = ft_strlen(buff[fd]);
+			if (ret[1] < 0)
+				break ;
+			ret[0] = ft_buff2line(&*line, &buff[fd]);
+			if (ret[1] == 0)
+				return (EOF_RCHD);
 		}
-		buffer[rd] = '\0';
-		rest = ft_strjoin(rest, buffer);
+		if (ret[0] == FOUND_ENDLINE)
+			return (READL_OK);
 	}
-	return (rest);
-}
-
-char	*get_new_line(char *rest)
-{
-	int	len;
-	char *str;
-
-	len = 0;
-	while (rest[len] && rest[len] != '\n')
-		len++;
-	str = ft_substr(rest, 0, len + 1);
-	return (str);
-}
-
-char	*get_new_rest(char *rest)
-{
-	size_t len;
-	char	*str;
-
-	len = 0;
-	while (rest[len] && rest[len] != '\n')
-		len++;
-	str = ft_substr(rest, len + 1, ft_strlen(rest) - len + 1);
-	free(rest);
-	return (str);
-}
-
-char	*next_get_line(int fd)
-{
-	char		*buffer;
-	char		*new_line;
-	static char	*rest;
-	int			rd;
-
-	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (NULL);
-	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
-	if (!buffer)
-		return (NULL);
-	rd = 1;
-	rest = read_files(rd, rest, fd, buffer);
-	if (!rest)
-		return (NULL);
-	if (!rest[0])
-	{
-		free(rest);
-		free(buffer);
-		rest = NULL;
-		return (NULL);
-	}
-	new_line = get_next_line(rest);
-	rest = get_new_rest(rest);
-	free(buffer);
-	return (new_line);
+	ft_free_null(&*line);
+	return (ERR_HPND);
 }
