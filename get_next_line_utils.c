@@ -10,108 +10,32 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+include "get_next_line.h"
 
-char	*ft_strchr(const char *s, int c)
+size_t	ft_strlen(const char *s)
 {
-	int	i;
+	size_t l;
 
-	i = 0;
-	if (!s)
-		return (NULL);
-	while (s[i])
-	{
-		if (s[i] == (unsigned char)c)
-			return ((char *)s + i);
-		i++;
-	}
-	return (0);
-}
-
-char	*ft_substr(char const *s, unsigned int start, size_t len)
-{
-	char	*new;
-	size_t	j;
-
-	if (!s)
-		return (0);
-	if (start > ft_strlen(s))
-	{
-		new = malloc(1);
-		if (!new)
-			return (0);
-		new[0] = '\0';
-		return (new);
-	}
-	if (len > ft_strlen(s))
-		len = ft_strlen(s);
-	new = (char *)malloc(len + 1);
-	if (!new)
-		return (new);
-	j = 0;
-	while (j < len)
-		new[j++] = s[start++];
-	new[j] = '\0';
-	return (new);
-}
-
-size_t	ft_strlen(const char *str)
-{
-	int	i;
-
-	i = 0 ;
-	while (str[i])
-		i++;
-	return (i);
-}
-
-char	*ft_strjoin(char *s1, char const *s2)
-{
-	unsigned int	size_s1;
-	unsigned int	size_s2;
-	char			*new;
-	unsigned int	i;
-	unsigned int	j;
-
-	if (!s1)
-		s1 = ft_strdup("");
-	size_s1 = ft_strlen(s1);
-	size_s2 = ft_strlen(s2);
-	new = (char *)malloc((size_s1 + size_s2 + 1) * sizeof(char));
-	if (!new)
-		return (NULL);
-	i = 0;
-	while (i < size_s1)
-	{
-		new[i] = s1[i];
-		i++;
-	}
-	j = 0;
-	while (i < size_s1 + size_s2)
-		new[i++] = s2[j++];
-	new[i] = '\0';
-	free(s1);
-	return (new);
+	l = 0;
+	while (s[l] != 0)
+		l++;
+	return (l);
 }
 
 char	*ft_strdup(const char *s1)
 {
-	char	*copy;
-	int		size;
-	int		j;
+	char	*s2;
+	size_t	size;
+	size_t	i;
 
-	size = 0;
-	while (s1[size])
-		size++;
-	copy = (char *)malloc((size + 1) * sizeof(char));
-	if (copy == NULL)
-		return (copy);
-	j = 0;
-	while (s1[j])
+	size = ft_strlen(s1) + 1;
+	if (!(s2 = (char *)malloc(size)))
+		return (0);
+	i = 0;
+	while (i < size)
 	{
-		copy[j] = s1[j];
-		j++;
+		((unsigned char *)s2)[i] = ((unsigned char *)s1)[i];
+		i++;
 	}
-	copy[j] = '\0';
-	return (copy);
+	return (s2);
 }
